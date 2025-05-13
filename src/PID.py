@@ -23,12 +23,12 @@ yourSensor = 0
 class PID:
     "a beautiful well made pid system for all vex uses"
 
-    def __init__(self):
-        self.KP = 1
-        self.KI = 0
-        self.KD = 0
+    def __init__(self, KP = 1, KI = 0, KD = 0):
+        self.KP = KP
+        self.KI = KI
+        self.KD = KD
 
-    def run(self, desiredValue, tollerance):
+    def run(self, desiredValue: int, tollerance: float):
         previousError = 0
         totalError = 0
         i = 0
@@ -99,7 +99,7 @@ class PID:
         self.KD = float(input("Enter KD: "))    
 """
 
-    def tune(self, desiredValue, tollerance, sd_file_name = "pidData.csv"):
+    def tune(self, desiredValue: int, tollerance: float, sd_file_name = "pidData.csv"):
         csvHeaderText = "time, error, derivative, totalError, output, desiredValue"
 
         data_buffer = csvHeaderText + "\n"
@@ -145,7 +145,7 @@ class turnPID(PID):
         self.left = leftMotorGroup
         self.right = rightMotorGroup
 
-    def run (self, desiredValue, tollerance):
+    def run (self, desiredValue: int, tollerance: float):
         previousError = 0
         totalError = 0
         i = 0
@@ -159,7 +159,7 @@ class turnPID(PID):
             totalError += error
             wait(50)
 
-    def tune(self, desiredValue, tollerance, sd_file_name = "pidData.csv"):
+    def tune(self, desiredValue: int, tollerance: float, sd_file_name = "pidData.csv"):
         csvHeaderText = "time, error, derivative, totalError, output, desiredValue"
 
         data_buffer = csvHeaderText + "\n"

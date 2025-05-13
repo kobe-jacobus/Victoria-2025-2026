@@ -14,5 +14,5 @@ def auton():
     brain.screen.print("autonomous code")
     # place automonous code here
     for i in range(0, 360, 30):
-        rotateTune.tune(i, 0.2 )
+        rotateTune.tune(i, 0.2, f"turnPID{i}.csv") 
 

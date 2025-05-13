@@ -12,7 +12,7 @@ def user_control():
 
 # ---------------------------------------------------------------------------- #
 
-def arcadeDrive(left, right, controller):
+def arcadeDrive(left: MotorGroup, right: MotorGroup, controller: Controller):
     """
     Arcade drive using the left joystick for forward/backward movement and the right joystick for turning.
 
