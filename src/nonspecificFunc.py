@@ -1,16 +1,7 @@
 from vex import *
-from main import left, right, controller_1, brain
 
 # ---------------------------------------------------------------------------- #
 
-def user_control():
-    brain.screen.clear_screen()
-    brain.screen.print("user control code")
-    while True:
-        arcadeDrive(left, right, controller_1)
-        wait(20, MSEC)
-
-# ---------------------------------------------------------------------------- #
 
 def arcadeDrive(left: MotorGroup, right: MotorGroup, controller: Controller):
     """
@@ -27,4 +18,3 @@ def arcadeDrive(left: MotorGroup, right: MotorGroup, controller: Controller):
     left.spin(FORWARD)
     right.spin(FORWARD)
     
-

@@ -9,32 +9,24 @@
 
 # Library imports
 from vex import *
-"""import matplotlib.pyplot as plt"""
-from main import left, right, controller_1, brain
-
-
-# Brain should be defined by default
-brain=Brain()
-
-brain.screen.print("Hello V5")
-
-yourSensor = 0
 
 class PID:
     "a beautiful well made pid system for all vex uses"
 
-    def __init__(self, KP = 1, KI = 0, KD = 0):
+    def __init__(self ,yourSensor ,brain: Brain, KP: float = 1, KI: float = 0, KD: float = 0):
         self.KP = KP
         self.KI = KI
         self.KD = KD
+        self.yourSensor = yourSensor
+        self.brain = brain
 
     def run(self, desiredValue: int, tollerance: float):
         previousError = 0
         totalError = 0
         i = 0
-        while abs(desiredValue - yourSensor) > tollerance:
+        while abs(desiredValue - self.yourSensor) > tollerance:
             i += 1
-            error = desiredValue - yourSensor
+            error = desiredValue - self.yourSensor
             derivative = error - previousError
             self.output = error * self.KP + derivative * self.KD + totalError * self.KI
             totalError += error
@@ -66,9 +58,9 @@ class PID:
         totalError = 0
         i = 0
 
-        while abs(desiredValue - yourSensor) > tollerance or close == False:
+        while abs(desiredValue - self.yourSensor) > tollerance or close == False:
             i += 1
-            error = desiredValue - yourSensor
+            error = desiredValue - self.yourSensor
             derivative = error - previousError
             self.output = error * self.KP + derivative * self.KD + totalError * self.KI
             totalError += error
@@ -113,9 +105,9 @@ class PID:
         totalError = 0
         i = 0
 
-        while abs(desiredValue - yourSensor) > tollerance == False:
+        while abs(desiredValue - self.yourSensor) > tollerance == False:
             i += 1
-            error = desiredValue - yourSensor
+            error = desiredValue - self.yourSensor
             derivative = error - previousError
             self.output = error * self.KP + derivative * self.KD + totalError * self.KI
             totalError += error
@@ -133,25 +125,26 @@ class PID:
 
             derivativeGraph.append(derivative)
             totalErrorGraph.append(totalError)
-        brain.sdcard.savefile(sd_file_name, bytearray(data_buffer, 'utf-8'))
+        self.brain.sdcard.savefile(sd_file_name, bytearray(data_buffer, 'utf-8'))
 
 class turnPID(PID):
     
-    def __init__(self, leftMotorGroup: MotorGroup, rightMotorGroup: MotorGroup, KP = 1, KI = 0, KD = 0):
-        super().__init__()
+    def __init__(self, yourSensor, brain: Brain, leftMotorGroup: MotorGroup, rightMotorGroup: MotorGroup, KP: float = 1, KI: float = 0, KD: float = 0):
         self.KP = KP
         self.KI = KI
         self.KD = KD
         self.left = leftMotorGroup
         self.right = rightMotorGroup
+        self.yourSensor = yourSensor
+        self.brain = brain
 
     def run (self, desiredValue: int, tollerance: float):
         previousError = 0
         totalError = 0
         i = 0
-        while abs(desiredValue - yourSensor) > tollerance:
+        while abs(desiredValue - self.yourSensor) > tollerance:
             i += 1
-            error = desiredValue - yourSensor
+            error = desiredValue - self.yourSensor
             derivative = error - previousError
             self.output = error * self.KP + derivative * self.KD + totalError * self.KI
             self.left.set_velocity(self.output, PERCENT)
@@ -173,9 +166,9 @@ class turnPID(PID):
         totalError = 0
         i = 0
 
-        while abs(desiredValue - yourSensor) > tollerance == False:
+        while abs(desiredValue - self.yourSensor) > tollerance == False:
             i += 1
-            error = desiredValue - yourSensor
+            error = desiredValue - self.yourSensor
             derivative = error - previousError
             self.output = error * self.KP + derivative * self.KD + totalError * self.KI
             self.left.set_velocity(self.output, PERCENT)
@@ -195,6 +188,6 @@ class turnPID(PID):
 
             derivativeGraph.append(derivative)
             totalErrorGraph.append(totalError)
-        brain.sdcard.savefile(sd_file_name, bytearray(data_buffer, 'utf-8'))
+        self.brain.sdcard.savefile(sd_file_name, bytearray(data_buffer, 'utf-8'))
         
 
