@@ -21,6 +21,8 @@ right_2 = Motor(Ports.PORT9, GearSetting.RATIO_6_1, True)
 right_3 = Motor(Ports.PORT8, GearSetting.RATIO_6_1, True)
 right = MotorGroup(right_1, right_2, right_3)
 intake = Motor(Ports.PORT1, GearSetting.RATIO_18_1, False)
+intakeSort = Motor(Ports.PORT2, False)
+out = Motor(Ports.PORT11, False)
 gyro = Inertial(Ports.PORT17)
 controller_1 = Controller()
 
@@ -93,6 +95,7 @@ class turnPID(PID):
         self.right = rightMotorGroup
         self.yourSensor = yourSensor
         self.brain = brain
+        self.output:float = 0
 
     def run (self, desiredValue: int, tollerance: float):
         previousError = 0
@@ -110,9 +113,9 @@ class turnPID(PID):
 
     def tune(self, desiredValue: int, tollerance: float, sd_file_name = "pidData.csv"):
         data_buffer: str = ""
-        csvHeaderText = "time, error, derivative, totalError, output, desiredValue"
+        csvHeaderText:str = "time, error, derivative, totalError, output, desiredValue"
 
-        data_buffer = csvHeaderText + "\n"
+        data_buffer:str = csvHeaderText + "\n"
 
         previousError = 0
         totalError = 0
@@ -120,7 +123,7 @@ class turnPID(PID):
 
         while abs(desiredValue - self.yourSensor) > tollerance:
             i += 1
-            error = desiredValue - self.yourSensor
+            error:float = desiredValue - self.yourSensor
             derivative = error - previousError
             self.output = error * self.KP + derivative * self.KD + totalError * self.KI
             self.left.set_velocity(self.output, PERCENT)
@@ -128,12 +131,12 @@ class turnPID(PID):
             totalError += error
             wait(50)
 
-            data_buffer += "%1.3f" %(i * 50) + ","
-            data_buffer += "%1.3f" %(error) + ","
-            data_buffer += "%1.3f" %(derivative) + ","
-            data_buffer += "%1.3f" %(totalError) + ","
-            data_buffer += "%1.3f" %(self.output) + ","
-            data_buffer += "%1.3f" %(desiredValue) + "\n"
+            data_buffer += str(i * 50) + ","
+            data_buffer += "%1.3f" % error + ","
+            data_buffer += "%1.3f" % derivative + ","
+            data_buffer += "%1.3f" % totalError + ","
+            data_buffer += "%1.3f" % self.output + ","
+            data_buffer += str(desiredValue) + "\n"
 
         self.brain.sdcard.savefile(sd_file_name, bytearray(data_buffer, 'utf-8'))
 
@@ -178,10 +181,13 @@ def intakeControl():
     """
     if controller_1.buttonR1.pressing():
         intake.spin(FORWARD, 100, PERCENT)
-    elif controller_1.buttonR2.pressing():
+        intakeSort.spin(FORWARD, 100, PERCENT)
+    elif controller_1.buttonR2.pressing():  
         intake.spin(REVERSE, 100, PERCENT)
+        intakeSort.spin(REVERSE, 100, PERCENT)
     else:
         intake.stop(HOLD)
+        intakeSort.stop(HOLD)
 
 # UI classes
 class button:
@@ -219,7 +225,7 @@ class autonSelector:
         buttons = []
         brain.screen.draw_image_from_file(self.background, 0, 0)
         for i in range(1,len(self.autons)+1):
-            buttons.append(button(50, 220, 10, 10 + (i-1)*60, Color.BLUE, str(self.names[i-1])))
+            buttons.append(button(50, 220, 10, 10 + (i-1)*60, Color.GREEN, str(self.names[i-1])))
             buttons[i-1].draw()
         brain.screen.render()
 
