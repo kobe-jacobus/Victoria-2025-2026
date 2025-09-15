@@ -165,6 +165,7 @@ def changeDriveGraph():
         k+=1
     elif controller_1.buttonDown.pressed:
         k-=1
+    controller_1.screen.print(k)
 
 def driveGraph(x):
     return (x**k)/10**((k-1)*2)
@@ -179,10 +180,16 @@ def arcadeDrive(left: MotorGroup, right: MotorGroup, controller: Controller):
     usecase:
         repeat in loop when driver control is active
     """
-    left.set_velocity((driveGraph(controller.axis3.position()) + controller.axis1.position()), PERCENT)
-    right.set_velocity((driveGraph(controller.axis3.position()) - controller.axis1.position()), PERCENT)
-    left.spin(FORWARD)
-    right.spin(FORWARD)
+    if controller.axis3.position() > 0:
+        left.set_velocity((driveGraph(controller.axis3.position()) + controller.axis1.position()), PERCENT)
+        right.set_velocity((driveGraph(controller.axis3.position()) - controller.axis1.position()), PERCENT)
+        left.spin(FORWARD)
+        right.spin(FORWARD)
+    else:
+        left.set_velocity((-driveGraph(controller.axis3.position()) + controller.axis1.position()), PERCENT)
+        right.set_velocity((-driveGraph(controller.axis3.position()) - controller.axis1.position()), PERCENT)
+        left.spin(FORWARD)
+        right.spin(FORWARD)
 
 def intakeControl():
     """
