@@ -157,6 +157,18 @@ def auton():
         rotateTune.tune(i, 0.2, 'turnPID'+ str(i) + '.csv')
 
 # user control functions
+k=2
+
+def changeDriveGraph():
+    global k
+    if controller_1.buttonUp.pressed:
+        k+=1
+    elif controller_1.buttonDown.pressed:
+        k-=1
+
+def driveGraph(x):
+    return (x**k)/10**((k-1)*2)
+
 def arcadeDrive(left: MotorGroup, right: MotorGroup, controller: Controller):
     """
     Arcade drive using the left joystick for forward/backward movement and the right joystick for turning.
@@ -167,8 +179,8 @@ def arcadeDrive(left: MotorGroup, right: MotorGroup, controller: Controller):
     usecase:
         repeat in loop when driver control is active
     """
-    left.set_velocity((controller.axis3.position() + controller.axis1.position()), PERCENT)
-    right.set_velocity((controller.axis3.position() - controller.axis1.position()), PERCENT)
+    left.set_velocity((driveGraph(controller.axis3.position()) + controller.axis1.position()), PERCENT)
+    right.set_velocity((driveGraph(controller.axis3.position()) - controller.axis1.position()), PERCENT)
     left.spin(FORWARD)
     right.spin(FORWARD)
 
