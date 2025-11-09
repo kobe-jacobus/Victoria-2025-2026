@@ -160,7 +160,7 @@ class turnPID(PID):
         i = 0
         while abs(desiredValue - self.yourSensor()) > tollerance:
             i += 1
-            error = desiredValue - self.yourSensor()
+            error:float = desiredValue - self.yourSensor() if desiredValue - self.yourSensor() <= 180 else desiredValue - self.yourSensor() - 180
             derivative = (error - previousError) / (i*50)
             totalError += error
             self.output = error * self.KP + derivative * self.KD + (totalError * (i*50)) * self.KI
@@ -189,13 +189,13 @@ class turnPID(PID):
 
         while abs(desiredValue - self.yourSensor()) > tollerance:
             i += 1
-            error:float = desiredValue - self.yourSensor() if desiredValue - self.yourSensor() <= 180 else desiredValue - self.yourSensor() - 360
+            error:float = desiredValue - self.yourSensor() if desiredValue - self.yourSensor() <= 180 else desiredValue - self.yourSensor() - 180
             derivative = (error - previousError) / (i*50)
             totalError += error
             self.output = error * self.KP + derivative * self.KD + (totalError * (i*50)) * self.KI
             self.left.set_velocity(self.output, PERCENT)
             self.right.set_velocity(-self.output, PERCENT)
-            wait(20)
+            wait(50)
             previousError = error
 
             # save one row of data
@@ -217,8 +217,8 @@ class turnPID(PID):
 # --------------------
 # create a turnPID instance for drivetrain rotation tuning
 rotatePID = turnPID(yourSensor= gyro.heading , brain = brain, leftMotorGroup=left, rightMotorGroup=right,
-                     KP = 0.3,
-                     KI = 0.00000001,
+                     KP = 0.2,
+                     KI = 0.00000007,
                      KD = 0.02
                      )
 
@@ -252,10 +252,14 @@ def Left():
     forward(800)
     right.spin(FORWARD, 0, PERCENT)
     left.spin(FORWARD, 0, PERCENT)
-    rotatePID.run(-90, 2)
-    forward(-550)
+    rotatePID.run(265, 2)
+    right.spin(REVERSE,20,PERCENT)
+    left.spin(REVERSE,20,PERCENT)
+    wait(1000,MSEC)
+    right.stop(HOLD)
+    left.stop(HOLD)
     outDown.spin(FORWARD, 100, PERCENT)
-    outUp.spin(FORWARD, 100, PERCENT)
+    outUp.spin(REVERSE, 100, PERCENT)
     wait(2, SECONDS)
     outDown.stop(COAST)
     outUp.stop(COAST)
@@ -266,10 +270,14 @@ def Right():
     forward(800)
     right.spin(FORWARD, 0, PERCENT)
     left.spin(FORWARD, 0, PERCENT)
-    rotatePID.run(90, 2)
-    forward(-550)
+    rotatePID.run(95, 2)
+    right.spin(REVERSE,20,PERCENT)
+    left.spin(REVERSE,20,PERCENT)
+    wait(1000,MSEC)
+    right.stop(HOLD)
+    left.stop(HOLD)
     outDown.spin(FORWARD, 100, PERCENT)
-    outUp.spin(FORWARD, 100, PERCENT)
+    outUp.spin(REVERSE, 100, PERCENT)
     wait(2, SECONDS)
     outDown.stop(COAST)
     outUp.stop(COAST)
