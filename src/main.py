@@ -31,19 +31,20 @@ gyro = Inertial(Ports.PORT17)
 controller_1 = Controller()
 controller_2 = Controller()
 
-left_1 = Motor(Ports.PORT20, GearSetting.RATIO_6_1, False)
-left_2 = Motor(Ports.PORT19, GearSetting.RATIO_6_1, False)
-left_3 = Motor(Ports.PORT18, GearSetting.RATIO_6_1, False)
+left_1 = Motor(Ports.PORT1, GearSetting.RATIO_6_1, False)
+left_2 = Motor(Ports.PORT2, GearSetting.RATIO_6_1, False)
+left_3 = Motor(Ports.PORT3, GearSetting.RATIO_6_1, True)
 left = MotorGroup(left_1, left_2, left_3)
 
-right_1 = Motor(Ports.PORT10, GearSetting.RATIO_6_1, True)
-right_2 = Motor(Ports.PORT9, GearSetting.RATIO_6_1, True)
-right_3 = Motor(Ports.PORT8, GearSetting.RATIO_6_1, True)
+right_1 = Motor(Ports.PORT11, GearSetting.RATIO_6_1, True)
+right_2 = Motor(Ports.PORT12, GearSetting.RATIO_6_1, True)
+right_3 = Motor(Ports.PORT13, GearSetting.RATIO_6_1, False)
 right = MotorGroup(right_1, right_2, right_3)
 
-intake = Motor(Ports.PORT1, GearSetting.RATIO_18_1, False)
-outUp = Motor(Ports.PORT5, True)
-outDown = Motor(Ports.PORT11, False)
+intakeMotor = Motor(Ports.PORT20, GearSetting.RATIO_18_1, False)
+storageMotor = Motor(Ports.PORT10, GearSetting.RATIO_18_1, False)
+outMotor = Motor(Ports.PORT5, True)
+
 
 
 #-------------#
@@ -174,7 +175,7 @@ class turnPID(PID):
         """Run tuning loop similar to PID.tune but apply outputs to drivetrain and save CSV.
 
         CSV columns:
-            time, error, derivative, integral, output, desiredValue
+            time, proportional, derivative, integral, output, desiredValue
         """
         if stopButton:
             stop = button(60, 220, 250, 10, Color.RED, "terminate")
@@ -240,12 +241,13 @@ def forward(mm: int, speed: int= 20):
 def tune():
     """Autonomous routine to tune turn PID for various angles.
     """
-    for i in range(0, 360, 30):
+    for i in range(30, 360, 30):
         right.spin(FORWARD, 0)
         left.spin(FORWARD, 0)
         rotatePID.tune(i, 2, 'turnPID'+ str(i) + '.csv', stopButton=True)
-        rotatePID.tune(-i, 2, 'turnPID'+ str(-i) + '.csv', stopButton=True)
-
+        right.stop(HOLD)
+        left.stop(HOLD)
+        wait(2, SECONDS)
 def Left():
     """temporary autonomous routine for scrimage
     """
@@ -285,12 +287,13 @@ def Right():
 # --------------------
 # user control helpers
 # --------------------
+k = 2  # exponent constant for drive graph
+
 def changeDriveGraph(controller: Controller):
     """Adjust exponent constant 'k' for drive graph via controller up/down buttons.
 
-    Returns new k. Note: local k is reinitialized each call — consider making persistent.
     """
-    k = 2
+    global k
     if controller.buttonUp.pressed:
         k += 1
     elif controller.buttonDown.pressed:
@@ -328,37 +331,34 @@ def arcadeDriveGraph(left: MotorGroup, right: MotorGroup, controller: Controller
     right.spin(FORWARD)
 
 
-def intakeControl():
+def inOutControl():
     """Control intake motors using controller buttons:
-    - R1: fast intake forward
-    - R2: reverse intake
+    - L1:   intake
+    - L2:   score low
+    - R1:   score mid
+    - R2:   score high
     - none: brake both motors
     """
-    if controller_1.buttonR1.pressing():
-        intake.spin(FORWARD, 100, PERCENT)
-    elif controller_1.buttonR2.pressing():  
-        intake.spin(REVERSE, 100, PERCENT)
-    else:
-        intake.stop(BRAKE)
-
-def outputControl():
-    """Control out motor using controller buttons:
-    - L1: output mid high goal
-    - L2: output Long goal
-    -  A: reverse out
-    """
-    if controller_1.buttonA.pressing():
-        outDown.spin(FORWARD, 100, PERCENT)
-        outUp.spin(FORWARD, 100, PERCENT)
-    elif controller_1.buttonL1.pressing():
-        outDown.spin(FORWARD, 100, PERCENT)
-        outUp.spin(REVERSE, 100, PERCENT)
+    if controller_1.buttonL1.pressing():
+        intakeMotor.spin(FORWARD, 100, PERCENT)
+        storageMotor.spin(FORWARD, 100, PERCENT)
+        outMotor.stop(BRAKE)
     elif controller_1.buttonL2.pressing():
-        outDown.spin(REVERSE, 100, PERCENT)
-        outUp.spin(REVERSE, 100, PERCENT)
+        intakeMotor.spin(REVERSE, 100, PERCENT)
+        storageMotor.spin(REVERSE, 100, PERCENT)
+        outMotor.stop(BRAKE)
+    elif controller_1.buttonR1.pressing():
+        intakeMotor.spin(FORWARD, 100, PERCENT)
+        storageMotor.spin(REVERSE, 100, PERCENT)
+        outMotor.spin(FORWARD, 100, PERCENT)
+    elif controller_1.buttonR2.pressing():
+        intakeMotor.spin(FORWARD, 100, PERCENT)
+        storageMotor.spin(REVERSE, 100, PERCENT)
+        outMotor.spin(REVERSE, 100, PERCENT)
     else:
-        outDown.stop(HOLD)
-        outUp.stop(HOLD)
+        intakeMotor.stop(BRAKE)
+        storageMotor.stop(BRAKE)
+        outMotor.stop(BRAKE)
 
 # --------------------
 # UI classes
@@ -490,8 +490,9 @@ def user_control():
     brain.screen.print("user control code")
     while True:
         arcadeDriveGraph(left, right, controller_1, torqueOn=controller_1.buttonX.pressing())
-        intakeControl()
+        inOutControl()
         outputControl()
+        storageControl()
         wait(20, MSEC)
 
 # show selector and create competition instance
