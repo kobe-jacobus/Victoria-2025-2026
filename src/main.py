@@ -31,19 +31,19 @@ gyro = Inertial(Ports.PORT17)
 controller_1 = Controller()
 controller_2 = Controller()
 
-left_1 = Motor(Ports.PORT1, GearSetting.RATIO_6_1, False)
-left_2 = Motor(Ports.PORT2, GearSetting.RATIO_6_1, False)
-left_3 = Motor(Ports.PORT3, GearSetting.RATIO_6_1, True)
+left_1 = Motor(Ports.PORT20, GearSetting.RATIO_6_1, False)
+left_2 = Motor(Ports.PORT19, GearSetting.RATIO_6_1, False)
+left_3 = Motor(Ports.PORT18, GearSetting.RATIO_6_1, True)
 left = MotorGroup(left_1, left_2, left_3)
 
-right_1 = Motor(Ports.PORT11, GearSetting.RATIO_6_1, True)
-right_2 = Motor(Ports.PORT12, GearSetting.RATIO_6_1, True)
-right_3 = Motor(Ports.PORT13, GearSetting.RATIO_6_1, False)
+right_1 = Motor(Ports.PORT10, GearSetting.RATIO_6_1, True)
+right_2 = Motor(Ports.PORT9, GearSetting.RATIO_6_1, True)
+right_3 = Motor(Ports.PORT8, GearSetting.RATIO_6_1, False)
 right = MotorGroup(right_1, right_2, right_3)
 
-intakeMotor = Motor(Ports.PORT20, GearSetting.RATIO_18_1, False)
-storageMotor = Motor(Ports.PORT10, GearSetting.RATIO_18_1, False)
-outMotor = Motor(Ports.PORT5, True)
+intakeMotor = Motor(Ports.PORT1, GearSetting.RATIO_18_1, False)
+storageMotor = Motor(Ports.PORT11, GearSetting.RATIO_18_1, False)
+outMotor = Motor(Ports.PORT16, True)
 
 
 
@@ -248,8 +248,9 @@ def tune():
         right.stop(HOLD)
         left.stop(HOLD)
         wait(2, SECONDS)
+
 def Left():
-    """temporary autonomous routine for scrimage
+    """temporary autonomous routine for scrimage 1
     """
     forward(800)
     right.spin(FORWARD, 0, PERCENT)
@@ -267,7 +268,7 @@ def Left():
     outUp.stop(COAST)
 
 def Right():
-    """temporary autonomous routine for scrimage
+    """temporary autonomous routine for scrimage 1
     """
     forward(800)
     right.spin(FORWARD, 0, PERCENT)
@@ -317,14 +318,16 @@ def driveGraph(x, k):
 def arcadeDriveGraph(left: MotorGroup, right: MotorGroup, controller: Controller, torqueOn: bool = False):
     """Arcade drive: forward/back from left joystick axis3 (processed by driveGraph),
     turn from right joystick axis1. Sets motor velocities and starts spinning.
+    this version includes quadratic drive graph for finer control at low speeds.
+    If torqueOn is True, limits max speed to 60% for more torque.
     """
     
     if torqueOn:
-        right.set_velocity((driveGraph(controller.axis3.position(),2) - controller.axis1.position())*6/10, PERCENT)
-        left.set_velocity((driveGraph(controller.axis3.position(),2) + controller.axis1.position())*6/10, PERCENT)
+        right.set_velocity((driveGraph(controller.axis3.position(),2) - driveGraph(controller.axis1.position(),2))*6/10, PERCENT)
+        left.set_velocity((driveGraph(controller.axis3.position(),2) + driveGraph(controller.axis1.position(),2))*6/10, PERCENT)
     else:
-        right.set_velocity((driveGraph(controller.axis3.position(),2) - controller.axis1.position()), PERCENT)
-        left.set_velocity((driveGraph(controller.axis3.position(),2) + controller.axis1.position()), PERCENT)
+        right.set_velocity((driveGraph(controller.axis3.position(),2) - driveGraph(controller.axis1.position(),2)), PERCENT)
+        left.set_velocity((driveGraph(controller.axis3.position(),2) + driveGraph(controller.axis1.position(),2)), PERCENT)
     
 
     left.spin(FORWARD)
@@ -364,7 +367,7 @@ def inOutControl():
 # UI classes
 # --------------------
 class button:
-    """Simple touchscreen button helper.
+    """touchscreen button object
 
     Parameters:
         height, width: size of rectangle
@@ -448,7 +451,12 @@ class autonSelector:
                         cancel = button(60, 220, 250, 10, Color.RED, "Cancel")
                         confirm.draw()
                         cancel.draw()
-                        brain.screen.print_at(self.doc[i], x = 10, y = 80, opaque = False)
+                        brain.screen.set_pen_color(Color.WHITE)
+                        brain.screen.set_cursor(5, 1)
+                        #brain.screen.print_at(self.doc[i], x = 10, y = 80, opaque = False,sep='\n')
+                        for txt in self.doc[i].split('\n'):
+                            brain.screen.print(txt, opaque = False, sep='\n')
+                            brain.screen.new_line()
                         wait(1, SECONDS)
                         brain.screen.render()
 
@@ -481,7 +489,7 @@ class autonSelector:
 selector = autonSelector(
     [Left, Right, tune],
     ["Left", "Right","Tune"],
-    ["placement:\n  paralel with wall\n  contacting Left side of park zone with right back", "placement:\n  paralel with wall\n  contacting Right side of park zone with right back",""],
+    ["placement:\n  paralel with wall\n  contacting Left side of park zone\n  with right back", "placement:\n  paralel with wall\n  contacting Right side of park zone\n  with right back",""],
     "background.png"
     )
 
@@ -491,8 +499,6 @@ def user_control():
     while True:
         arcadeDriveGraph(left, right, controller_1, torqueOn=controller_1.buttonX.pressing())
         inOutControl()
-        outputControl()
-        storageControl()
         wait(20, MSEC)
 
 # show selector and create competition instance
@@ -501,4 +507,3 @@ selector.display()
 # create competition instance
 comp = Competition(user_control, selector.selected)
 
-# actions to do when the program starts
