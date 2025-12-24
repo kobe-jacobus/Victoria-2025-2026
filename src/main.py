@@ -357,7 +357,7 @@ def inOutControl():
     elif controller_1.buttonR2.pressing():
         intakeMotor.spin(FORWARD, 100, PERCENT)
         storageMotor.spin(REVERSE, 100, PERCENT)
-        outMotor.spin(REVERSE, 100, PERCENT)
+        outMotor.spin(REVERSE, 60, PERCENT)
     else:
         intakeMotor.stop(BRAKE)
         storageMotor.stop(BRAKE)
