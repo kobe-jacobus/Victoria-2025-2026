@@ -45,6 +45,7 @@ intakeMotor = Motor(Ports.PORT1, GearSetting.RATIO_18_1, False)
 storageMotor = Motor(Ports.PORT11, GearSetting.RATIO_18_1, False)
 outMotor = Motor(Ports.PORT16, True)
 
+loaderPiston = Pneumatics(brain.three_wire_port.a)
 
 
 #-------------#
@@ -172,7 +173,7 @@ class turnPID(PID):
             previousError = error
 
     def tune(self, desiredValue: int, tollerance: float, sd_file_name = "pidData.csv", stopButton = False):
-        """Run tuning loop similar to PID.tune but apply outputs to drivetrain and save CSV.
+        """Run tuning loop similar to PID.tune but saves a CSV containing PID data.
 
         CSV columns:
             time, proportional, derivative, integral, output, desiredValue
