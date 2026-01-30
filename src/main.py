@@ -387,7 +387,7 @@ def Fullauton():
     storageMotor.spin(FORWARD, 80, PERCENT)             # outtake the blue blocks
     intakeMotor.spin(FORWARD, -80, PERCENT)
     wait(0.7, SECONDS)
-    Longgoal()                                          # score in the long goal
+    Longgoal()                                          # score in the long goal kaas
 
 
 # --------------------
