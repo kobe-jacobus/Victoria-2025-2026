@@ -296,6 +296,21 @@ def forward(mm: int, speed: int= 20):
     right.spin_for(FORWARD, deg, wait= False)
     left.spin_for(FORWARD, deg, wait= True)
 
+def Longgoal():
+    intakeMotor.spin(FORWARD, 60, PERCENT)              # outake preload long goal
+    storageMotor.spin(FORWARD, 80, PERCENT)
+    outMotor.spin(FORWARD, -80, PERCENT)
+
+def Stopallmotors():
+    intakeMotor.stop()
+    storageMotor.stop()
+    outMotor.stop()
+
+def stopdrivetrain():
+    wait(0.5, SECONDS)
+    left.stop
+    right.stop
+
 # --------------------
 # autonomous routines
 # --------------------
@@ -348,6 +363,32 @@ def Right():
     storageMotor.spin(FORWARD, 80, PERCENT)
     intakeMotor.spin(FORWARD, 60, PERCENT)
     outMotor.spin(FORWARD, 80, PERCENT)
+
+def Fullauton():
+    outPiston.open()                                    # Extension outtake
+    forward(-780, 15)                                   # drive backwards
+    rotatePID.tune(-90, 2)                              # turn to -90°
+    forward(-555, 25)                                   # drive backwards to long goal
+    forward(-20, 5)
+    stopdrivetrain()
+    Longgoal()                                          # outake preload long goal
+    wait(2, SECONDS)                                    # wait for preload to be scored
+    Stopallmotors()
+    loaderPiston.open()                                 # open the loader mech
+    intakeMotor.spin(FORWARD, 80, PERCENT)              # spin intake and storage inwards
+    storageMotor.spin(REVERSE, 100, PERCENT)
+    forward(725, 20)                                    # drive forward to the loader
+    wait(1.5, SECONDS)                                  # wait for a couple of blocks to come out the loader
+    Stopallmotors()                                     # stop intake and outtake
+    forward(-700, 25)                                   # drive backwards to long goal
+    forward(-20, 5)
+    stopdrivetrain()
+    loaderPiston.close()                                # close the loader mech
+    storageMotor.spin(FORWARD, 80, PERCENT)             # outtake the blue blocks
+    intakeMotor.spin(FORWARD, -80, PERCENT)
+    wait(0.7, SECONDS)
+    Longgoal()                                          # score in the long goal
+
 
 # --------------------
 # user control helpers
@@ -576,8 +617,8 @@ class autonSelector:
 # UI setup and competition
 # --------------------
 selector = autonSelector(
-    [Left, Right, tune, lambda: None, lambda: None, lambda: None, lambda: None, lambda: None],
-    ["Left", "Right", "Tune", "empty", "empty", "empty", "empty", "empty"],
+    [Left, Right, tune, Fullauton, lambda: None, lambda: None, lambda: None, lambda: None],
+    ["Left", "Right", "Tune", "Fullauton", "empty", "empty", "empty", "empty"],
     ["LEFT\n placement:\n  paralel with wall\n  contacting start of Left park zone corner\n  with right back", "RIGHT\n placement:\n  paralel with wall\n  contacting start of Right park zone corner\n  with left back","", "", "", "", "", ""],
     "background.png"
     )
@@ -594,8 +635,8 @@ def user_control():
         wait(20, MSEC)
 
 # show selector COMMENT OUT IF NOT USING AUTON
-selector.display()
+# selector.display()
 
 # create competition instance
-comp = Competition(user_control, selector.selected)
+comp = Competition(user_control, Fullauton)
 
