@@ -306,8 +306,8 @@ def Stopallmotors():
     storageMotor.stop()
     outMotor.stop()
 
-def stopdrivetrain():
-    wait(0.5, SECONDS)
+def stopdrivetrain(sec):
+    wait(sec, SECONDS)
     left.stop
     right.stop
 
@@ -364,30 +364,59 @@ def Right():
     intakeMotor.spin(FORWARD, 60, PERCENT)
     outMotor.spin(FORWARD, 80, PERCENT)
 
-def Fullauton():
+def Fullautongoed():
+    # start
     outPiston.open()                                    # Extension outtake
-    forward(-780, 15)                                   # drive backwards
+    #start to preload in long goal
+    forward(-795, 15)                                   # drive backwards
     rotatePID.tune(-90, 2)                              # turn to -90°
     forward(-555, 25)                                   # drive backwards to long goal
-    forward(-20, 5)
-    stopdrivetrain()
+    forward(-40, 5)
+    stopdrivetrain(2)
     Longgoal()                                          # outake preload long goal
-    wait(2, SECONDS)                                    # wait for preload to be scored
+    wait(0.7, SECONDS)                                  # wait for preload to be scored
     Stopallmotors()
+    # loader 1
     loaderPiston.open()                                 # open the loader mech
     intakeMotor.spin(FORWARD, 80, PERCENT)              # spin intake and storage inwards
     storageMotor.spin(REVERSE, 100, PERCENT)
-    forward(725, 20)                                    # drive forward to the loader
+    forward(720, 20)                                    # drive forward to the loader
     wait(1.5, SECONDS)                                  # wait for a couple of blocks to come out the loader
     Stopallmotors()                                     # stop intake and outtake
+    # score red blocks loader 1
     forward(-700, 25)                                   # drive backwards to long goal
-    forward(-20, 5)
-    stopdrivetrain()
+    forward(-40, 5)
+    stopdrivetrain(1)
     loaderPiston.close()                                # close the loader mech
     storageMotor.spin(FORWARD, 80, PERCENT)             # outtake the blue blocks
     intakeMotor.spin(FORWARD, -80, PERCENT)
-    wait(0.7, SECONDS)
-    Longgoal()                                          # score in the long goal kaas
+    wait(0.85, SECONDS)                                 # time to outtake blue blocks
+    Longgoal()                                          # score in the long goal
+    wait(3.5, SECONDS)
+    Stopallmotors()
+    # push blocks in control zone
+    forward(180, 15)                                    # drive away from long goal
+    rotatePID.tune(0, 2)                                # turn to get to the side of long goal
+    forward(270, 15)
+    wait(0.2, SECONDS)
+    rotatePID.tune(-90, 2)
+    descorePiston.open()                                # open the descore mech
+    wait(1, SECONDS)
+    descorePiston.close()
+    forward(-850, 25)                                   # push blocks in control zone
+    # go to second loader
+    descorePiston.open()
+    forward(800, 20)
+    turnPID(0, 2)
+    forward(2000, 20)
+    turnPID(-90, 2)
+    forward(-600, 20)
+    forward(-40, 5)
+    loaderPiston.open()
+    forward(700, 20)
+
+
+
 
 
 # --------------------
@@ -617,7 +646,7 @@ class autonSelector:
 # UI setup and competition
 # --------------------
 selector = autonSelector(
-    [Left, Right, tune, Fullauton, lambda: None, lambda: None, lambda: None, lambda: None],
+    [Left, Right, tune, Fullautongoed, lambda: None, lambda: None, lambda: None, lambda: None],
     ["Left", "Right", "Tune", "Fullauton", "empty", "empty", "empty", "empty"],
     ["LEFT\n placement:\n  paralel with wall\n  contacting start of Left park zone corner\n  with right back", "RIGHT\n placement:\n  paralel with wall\n  contacting start of Right park zone corner\n  with left back","", "", "", "", "", ""],
     "background.png"
@@ -638,5 +667,5 @@ def user_control():
 # selector.display()
 
 # create competition instance
-comp = Competition(user_control, Fullauton)
+comp = Competition(user_control, Fullautongoed)
 
