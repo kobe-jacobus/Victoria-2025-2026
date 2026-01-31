@@ -297,7 +297,7 @@ def forward(mm: int, speed: int= 20):
     left.spin_for(FORWARD, deg, wait= True)
 
 def Longgoal():
-    intakeMotor.spin(FORWARD, 60, PERCENT)              # outake preload long goal
+    intakeMotor.spin(FORWARD, 60, PERCENT)
     storageMotor.spin(FORWARD, 80, PERCENT)
     outMotor.spin(FORWARD, -80, PERCENT)
 
@@ -364,7 +364,7 @@ def Right():
     intakeMotor.spin(FORWARD, 60, PERCENT)
     outMotor.spin(FORWARD, 80, PERCENT)
 
-def Fullautongoed():
+def FullautonV1():
     # start
     outPiston.open()                                    # Extension outtake
     #start to preload in long goal
@@ -416,6 +416,37 @@ def Fullautongoed():
     forward(700, 20)
 
 
+
+def fullautonV2():
+    # start
+    outPiston.open()                                    # Extension outtake
+    #start to preload in long goal
+    forward(-795, 15)                                   # drive backwards
+    rotatePID.tune(90, 2)                               # turn to -90°
+    forward(-555, 25)                                   # drive backwards to long goal
+    forward(-40, 5)
+    stopdrivetrain(2)
+    Longgoal()                                          # outake preload long goal
+    wait(0.7, SECONDS)                                  # wait for preload to be scored
+    Stopallmotors()
+    # loader 1
+    loaderPiston.open()                                 # open the loader mech
+    intakeMotor.spin(FORWARD, 80, PERCENT)              # spin intake and storage inwards
+    storageMotor.spin(REVERSE, 100, PERCENT)
+    forward(720, 20)                                    # drive forward to the loader
+    wait(1.5, SECONDS)                                  # wait for blocks to come out the loader
+    Stopallmotors()                                     # stop intake and outtake
+    # score blocks loader 1
+    forward(-700, 25)                                   # drive backwards to long goal
+    intakeMotor.spin(FORWARD, 60, PERCENT)
+    storageMotor.spin(FORWARD, 30, PERCENT)             # slower so that the blocks come out 1 by 1
+    outMotor.spin(FORWARD, -80, PERCENT)
+
+
+def backupauton():
+    intakeMotor.spin(FORWARD, 60, PERCENT)
+    wait(2, SECONDS)
+    intakeMotor.stop()   
 
 
 
@@ -667,5 +698,5 @@ def user_control():
 # selector.display()
 
 # create competition instance
-comp = Competition(user_control, Fullautongoed)
+comp = Competition(user_control, FullautonV1)
 
