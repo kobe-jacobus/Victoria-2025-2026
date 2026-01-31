@@ -382,7 +382,7 @@ def FullautonV1():
     storageMotor.spin(REVERSE, 100, PERCENT)
     forward(720, 20)                                    # drive forward to the loader
     wait(1.5, SECONDS)                                  # wait for a couple of blocks to come out the loader
-    Stopallmotors()                                     # stop intake and outtake
+    Stopallmotors()                                     # stop intake
     # score red blocks loader 1
     forward(-700, 25)                                   # drive backwards to long goal
     forward(-40, 5)
@@ -404,18 +404,8 @@ def FullautonV1():
     wait(1, SECONDS)
     descorePiston.close()
     forward(-850, 25)                                   # push blocks in control zone
-    # go to second loader
-    descorePiston.open()
-    forward(800, 20)
-    turnPID(0, 2)
-    forward(2000, 20)
-    turnPID(-90, 2)
-    forward(-600, 20)
-    forward(-40, 5)
-    loaderPiston.open()
-    forward(700, 20)
 
-
+# if you read this, you really think i tested this? oh hell nah, that's to much work!
 
 def fullautonV2():
     # start
@@ -435,12 +425,86 @@ def fullautonV2():
     storageMotor.spin(REVERSE, 100, PERCENT)
     forward(720, 20)                                    # drive forward to the loader
     wait(1.5, SECONDS)                                  # wait for blocks to come out the loader
-    Stopallmotors()                                     # stop intake and outtake
+    Stopallmotors()                                     # stop intake
     # score blocks loader 1
     forward(-700, 25)                                   # drive backwards to long goal
     intakeMotor.spin(FORWARD, 60, PERCENT)
     storageMotor.spin(FORWARD, 30, PERCENT)             # slower so that the blocks come out 1 by 1
     outMotor.spin(FORWARD, -80, PERCENT)
+    wait(4, SECONDS)
+    # go intake 2 extra blocks
+    forward(180, 15)                                    # drive away from long goal
+    rotatePID.tune(0, 2)                                # turn to get to the side of long goal
+    forward(620, 15)
+    rotatePID.tune(-90, 2)                              # turn to the extra blocks
+    intakeMotor.spin(FORWARD, 80, PERCENT)              # spin intake and storage inwards
+    storageMotor.spin(REVERSE, 100, PERCENT)
+    forward(190, 15)
+    Stopallmotors()
+    # drive back to long goal
+    wait(0.2, SECONDS)
+    forward(-190, 15)
+    rotatePID(0, 2)
+    forward(-620, 15)
+    rotatePID(90, 2)
+    forward(180, 25)                                    # drive to long goal
+    forward(-40, 5)
+    stopdrivetrain(2)
+    # score the extra blocks
+    Longgoal()
+    wait(2, SECONDS)
+    Stopallmotors()
+    # drive to the long goal on the other side of the field
+    forward(180, 15)
+    rotatePID(0, 2)
+    forward(2500, 15)
+    rotatePID(90, 2)
+    forward(-180, 25)
+    forward(-40, 5)
+    stopdrivetrain()
+    # go empty loader
+    loaderPiston.open()                                 # open the loader mech
+    intakeMotor.spin(FORWARD, 80, PERCENT)              # spin intake and storage inwards
+    storageMotor.spin(REVERSE, 100, PERCENT)
+    forward(720, 20)                                    # drive forward to the loader
+    wait(1.5, SECONDS)                                  # wait for blocks to come out the loader
+    Stopallmotors()                                     # stop intake and outtake
+    # go score blocks in long goal
+    forward(-720, 25)
+    forward(-40, 5)
+    stopdrivetrain()
+    loaderPiston.close()
+    intakeMotor.spin(FORWARD, 60, PERCENT)
+    storageMotor.spin(FORWARD, 30, PERCENT)             # slower so that the blocks come out 1 by 1
+    outMotor.spin(FORWARD, -80, PERCENT)
+    wait(4, SECONDS)
+    # go intake extra blocks
+    forward(180, 15)                                    # drive away from long goal
+    rotatePID.tune(-180, 2)                             # turn to get to the side of long goal
+    forward(620, 15)
+    rotatePID.tune(-90, 2)                              # turn to the extra blocks
+    intakeMotor.spin(FORWARD, 80, PERCENT)              # spin intake and storage inwards
+    storageMotor.spin(REVERSE, 100, PERCENT)
+    forward(250, 15)
+    Stopallmotors()
+    # drive back to long goal
+    wait(0.2, SECONDS)
+    forward(-190, 15)
+    rotatePID(0, 2)
+    forward(-620, 15)
+    rotatePID(90, 2)
+    forward(180, 25)                                    # drive to long goal
+    forward(-40, 5)
+    stopdrivetrain(2)
+    # score extra blocks
+    Longgoal()
+    wait(4, SECONDS)
+    # go park
+    forward(180, 15)
+    rotatePID(-180, 2)
+    forward(125, 15)
+    rotatePID(90, 2)
+    forward(2000, 100)
 
 
 def backupauton():
@@ -677,8 +741,8 @@ class autonSelector:
 # UI setup and competition
 # --------------------
 selector = autonSelector(
-    [Left, Right, tune, Fullautongoed, lambda: None, lambda: None, lambda: None, lambda: None],
-    ["Left", "Right", "Tune", "Fullauton", "empty", "empty", "empty", "empty"],
+    [Left, Right, tune, FullautonV1, fullautonV2, backupauton, lambda: None, lambda: None],
+    ["Left", "Right", "Tune", "Auto Skills V1", "Auto Skills V2", "Backup Auton", "empty", "empty"],
     ["LEFT\n placement:\n  paralel with wall\n  contacting start of Left park zone corner\n  with right back", "RIGHT\n placement:\n  paralel with wall\n  contacting start of Right park zone corner\n  with left back","", "", "", "", "", ""],
     "background.png"
     )
@@ -698,5 +762,5 @@ def user_control():
 # selector.display()
 
 # create competition instance
-comp = Competition(user_control, FullautonV1)
+comp = Competition(user_control, fullautonV2)
 
