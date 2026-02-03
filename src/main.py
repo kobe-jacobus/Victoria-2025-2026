@@ -519,20 +519,6 @@ def backupauton():
 # --------------------
 k = 2  # exponent constant for drive graph
 
-def changeDriveGraph(controller: Controller):
-    """Adjust exponent constant 'k' for drive graph via controller up/down buttons.
-
-    """
-    global k
-    if controller.buttonUp.pressed:
-        k += 1
-    elif controller.buttonDown.pressed:
-        k -= 1
-    controller.screen.clear_screen()
-    controller.screen.print(k)
-    return k
-
-
 def driveGraph(x, k):
     """Map joystick input x with exponent k to a velocity curve.
 
